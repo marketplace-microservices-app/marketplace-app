@@ -13,6 +13,7 @@ export default function Navbar() {
 
   // Get User from Redux
   const user = useSelector((state) => state.auth.user);
+  const cart = useSelector((state) => state.cart.products);
 
   // Check if user exists
   const isAuthenticated = !!user;
@@ -44,7 +45,7 @@ export default function Navbar() {
                 href="#"
                 className="text-muted-foreground hover:text-foreground"
               >
-                My Cart
+                My Cart {cart.length > 0 && `(${cart.length})`}
               </Link>
             </nav>
           )}

@@ -17,7 +17,12 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
+import { addToCart } from "@/redux/cartSlice";
+import { useDispatch } from "react-redux";
+
 export default function ProductDetails({ product }) {
+  const dispatch = useDispatch();
+
   const [quantity, setQuantity] = useState(1);
 
   // Handle quantity changes
@@ -52,11 +57,28 @@ export default function ProductDetails({ product }) {
     }
   };
 
-  const addToCart = () => {
+  const addItemToCart = () => {
     toast.info(`${quantity} × ${product.product_name} added to your cart`, {
       description: `You have added ${quantity} units of ${product.product_name} to your cart.`,
       variant: "destructive",
     });
+
+    // Product Details that should go to the cart
+    const cartItem = {
+      product_id: product.id,
+      product_code: product.product_code,
+      product_name: product.product_name,
+      item_price: product.item_price,
+      quantity: quantity,
+      available_stock: product.available_stock,
+      seller_id: product.seller_id,
+    };
+
+    // Add the cartItem to the redux cart
+    dispatch(addToCart(cartItem));
+
+    // Reset quantity to 1 after adding to cart
+    setQuantity(1);
   };
 
   return (
@@ -187,7 +209,7 @@ export default function ProductDetails({ product }) {
                 <Button
                   className="w-full"
                   size="lg"
-                  onClick={addToCart}
+                  onClick={addItemToCart}
                   disabled={product.available_stock <= 0}
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
