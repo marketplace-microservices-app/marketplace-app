@@ -4,8 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
+import { logout } from "@/redux/authSlice";
+
+import { useSelector, useDispatch } from "react-redux";
+
 export default function Navbar() {
   const pathname = usePathname();
+
+  // Get User from Redux
+  const user = useSelector((state) => state.auth.user);
+
+  // Check if user exists
+  const isAuthenticated = !!user;
+
+  const dispatch = useDispatch();
 
   return (
     <header className="border-b">
@@ -14,38 +26,41 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-2">
             <span className="font-bold">Marketplace App</span>
           </Link>
-          <nav className="hidden md:flex gap-6">
-            <Link
-              href="/"
-              className={
-                pathname === "/"
-                  ? "font-medium text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }
-            >
-              Home
-            </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Products
-            </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              My Orders
-            </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              My Cart
-            </Link>
-          </nav>
+          {isAuthenticated && (
+            <nav className="hidden md:flex gap-6">
+              <Link
+                href="/"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Products
+              </Link>
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                My Orders
+              </Link>
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                My Cart
+              </Link>
+            </nav>
+          )}
         </div>
-        <div className="flex items-center gap-4">
+        {isAuthenticated ? (
+          <div className="flex items-center gap-4">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              onClick={() => dispatch(logout())}
+            >
+              <span>Logout</span>
+            </Button>
+          </div>
+        ) : (
           <div className="hidden sm:flex gap-2">
             <Button asChild variant="ghost" size="sm">
               <Link href="/login">Sign In</Link>
@@ -54,7 +69,17 @@ export default function Navbar() {
               <Link href="/register">Sign Up</Link>
             </Button>
           </div>
-        </div>
+        )}
+        {/* <div className="flex items-center gap-4">
+          <div className="hidden sm:flex gap-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/login">Sign In</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/register">Sign Up</Link>
+            </Button>
+          </div>
+        </div> */}
       </div>
     </header>
   );
