@@ -36,7 +36,7 @@ export default function Navbar() {
                 Products
               </Link>
               <Link
-                href="#"
+                href="/orders"
                 className="text-muted-foreground hover:text-foreground"
               >
                 My Orders
