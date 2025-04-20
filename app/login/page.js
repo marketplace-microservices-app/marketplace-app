@@ -1,6 +1,20 @@
+"use client";
 import LoginForm from "@/components/login-form";
+import { redirect } from "next/navigation";
+
+import { useSelector } from "react-redux";
 
 export default function LoginPage() {
+  // Get User from Redux
+  const user = useSelector((state) => state.auth.user);
+
+  // Check if user exists
+  const isAuthenticated = !!user; // Check if user exists
+
+  // Redirect to Home if authenticated
+  if (isAuthenticated) {
+    redirect("/");
+  }
   return (
     <div className="container mx-auto py-10">
       <div className="max-w-md mx-auto">
