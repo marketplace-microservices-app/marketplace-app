@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "./ui/button";
-// import { formatCurrency } from "@/lib/utils";
 
 export default function ProductCard({ product }) {
   // Generate a product image based on the product name
@@ -33,13 +32,9 @@ export default function ProductCard({ product }) {
         </p>
 
         <div className="mt-4 pt-4 border-t flex items-center justify-between">
-          <span className="font-bold text-xl">
-            {`$ ${product.item_price}`}
-            {/* {formatCurrency(product.item_price)} */}
-          </span>
+          <span className="font-bold text-xl">{`$ ${product.item_price}`}</span>
           <span className="font-bold text-xl">
             <Button>View</Button>
-            {/* {formatCurrency(product.item_price)} */}
           </span>
         </div>
       </div>
