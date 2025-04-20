@@ -42,7 +42,7 @@ export default function Navbar() {
                 My Orders
               </Link>
               <Link
-                href="#"
+                href="/cart"
                 className="text-muted-foreground hover:text-foreground"
               >
                 My Cart {cart.length > 0 && `(${cart.length})`}
