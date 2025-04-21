@@ -39,7 +39,7 @@ export default function LoginForm() {
       user: {
         id: "a4da6660-dcb7-4407-9e90-eeb82d518e73",
         email: "jane.doe@example.com",
-        role: "buyer",
+        role: "seller",
       },
     };
 

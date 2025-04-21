@@ -31,9 +31,9 @@ export default function Home() {
           {user.role === "seller" ? <SellerHome /> : <BuyerHome />}
         </div>
         <div className="flex justify-center">
-          <Link href="/products">
+          {/* <Link href="/products">
             <Button variant="outline">Load More</Button>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </>

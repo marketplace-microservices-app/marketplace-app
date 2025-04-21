@@ -200,7 +200,7 @@ function BuyerHome() {
       </div>
 
       <div className="mb-8">
-        <ProductGrid products={products} />
+        <ProductGrid products={products} viewType="buyer" />
       </div>
     </div>
   );
