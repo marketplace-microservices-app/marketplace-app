@@ -1,19 +1,15 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "./ui/button";
 
-export default function ProductCard({ product }) {
-  // Generate a product image based on the product name
-  const getProductImage = (productName) => {
-    // Convert product name to lowercase and replace spaces with hyphens
-    const formattedName = productName.toLowerCase().replace(/\s+/g, "-");
-    return `/placeholder.svg?height=200&width=200&text=${formattedName}`;
-  };
-
+export default function ProductCard({ product, viewType }) {
   return (
     <Link
-      href={`/products/${product.id}`}
+      href={
+        viewType === "buyer"
+          ? `/products/${product.id}`
+          : `/products/edit/${product.id}`
+      }
       className="group block rounded-lg border bg-card transition-all hover:shadow-md"
     >
       <div className="p-5">

@@ -11,7 +11,7 @@ export default function ProductGrid({ products, viewType }) {
   return (
     <div className={`grid ${gridColumnCount} gap-4 md:gap-6`}>
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard key={product.id} product={product} viewType={viewType} />
       ))}
     </div>
   );
