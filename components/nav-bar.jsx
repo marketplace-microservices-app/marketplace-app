@@ -29,24 +29,28 @@ export default function Navbar() {
           </Link>
           {isAuthenticated && (
             <nav className="hidden md:flex gap-6">
-              <Link
-                href="/"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Products
-              </Link>
-              <Link
-                href="/orders"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                My Orders
-              </Link>
-              <Link
-                href="/cart"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                My Cart {cart.length > 0 && `(${cart.length})`}
-              </Link>
+              {user.role === "buyer" && (
+                <>
+                  <Link
+                    href="/"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Products
+                  </Link>
+                  <Link
+                    href="/orders"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    My Orders
+                  </Link>
+                  <Link
+                    href="/cart"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    My Cart {cart.length > 0 && `(${cart.length})`}
+                  </Link>
+                </>
+              )}
             </nav>
           )}
         </div>
