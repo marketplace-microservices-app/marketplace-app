@@ -1,8 +1,6 @@
 import ProductCard from "@/components/product-card";
 
 export default function ProductGrid({ products, viewType }) {
-  console.log("vt", viewType);
-
   const gridColumnCount =
     viewType === "buyer"
       ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-5"
