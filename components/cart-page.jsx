@@ -15,11 +15,16 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 import { useSelector } from "react-redux";
+import { fetchData, postData } from "@/lib/apiService";
 
 export default function CartPage() {
   const cartProducts = useSelector((state) => state.cart.products);
+  const user = useSelector((state) => state.auth.user);
 
   const [cartItems, setCartItems] = useState(cartProducts);
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Calculate total price for a single item
   const calculateItemTotal = (price, quantity) => {
@@ -34,11 +39,57 @@ export default function CartPage() {
   };
 
   // Handle Create Order
-  const handleCheckout = () => {
-    toast.success("Order placed!,", {
-      title: "Order placed!",
-      description: "Your order has been successfully placed.",
-    });
+  const handleCheckout = async () => {
+    setLoading(true);
+
+    // Get BuyerId using UserId
+    const { id: buyerId } = (
+      await fetchData(`users/get-buyer-details-from-userId/${user.id}`)
+    ).data;
+
+    const orderPayload = {
+      buyerId: buyerId,
+      products: cartItems.map((item) => ({
+        productId: item.product_id,
+        quantity: item.quantity,
+        itemPrice: item.item_price,
+        availableStock: item.available_stock,
+      })),
+    };
+
+    try {
+      const response = await postData(`orders/create`, orderPayload);
+      console.log("order create", response);
+
+      if (response.status !== 200 || !response) {
+        setError(response.message);
+        setIsSubmitting(false);
+
+        toast.error(error, {
+          description: "There was an issue with placing the order",
+          variant: "error",
+        });
+
+        setLoading(false);
+
+        return;
+      } else if (response.status === 200) {
+        toast.success(response.message, {
+          title: "Order placed!",
+          description: "Your order has been successfully placed.",
+        });
+
+        setLoading(false);
+      }
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+
+      toast.error(error, {
+        description: "There was an logging to your account.",
+        variant: "error",
+      });
+    }
   };
 
   return (
