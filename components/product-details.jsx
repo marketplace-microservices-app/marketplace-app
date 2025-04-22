@@ -1,6 +1,5 @@
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Minus,
@@ -19,8 +18,26 @@ import { toast } from "sonner";
 
 import { addToCart } from "@/redux/cartSlice";
 import { useDispatch } from "react-redux";
+import { fetchData } from "@/lib/apiService";
 
-export default function ProductDetails({ product }) {
+export default function ProductDetails({ productId }) {
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      const response = await fetchData(
+        `product/get-product-details-by-productId/${productId}`,
+        null
+      );
+      setProduct(response?.data || []);
+      setLoading(false);
+    };
+
+    fetchProduct();
+  }, []);
+
   const dispatch = useDispatch();
 
   const [quantity, setQuantity] = useState(1);
@@ -31,7 +48,7 @@ export default function ProductDetails({ product }) {
       setQuantity(quantity + 1);
     } else {
       toast.warning("Maximum stock reached", {
-        description: `Only ${product.available_stock} items available`,
+        description: `Only ${product?.available_stock} items available`,
         variant: "destructive",
       });
     }
@@ -47,10 +64,10 @@ export default function ProductDetails({ product }) {
     const value = Number.parseInt(e.target.value);
     if (isNaN(value) || value < 1) {
       setQuantity(1);
-    } else if (value > product.available_stock) {
-      setQuantity(product.available_stock);
+    } else if (value > product?.available_stock) {
+      setQuantity(product?.available_stock);
       toast.warning("Maximum stock reached", {
-        description: `Only ${product.available_stock} items available`,
+        description: `Only ${product?.available_stock} items available`,
       });
     } else {
       setQuantity(value);
@@ -81,15 +98,20 @@ export default function ProductDetails({ product }) {
     setQuantity(1);
   };
 
+  // If loading
+  if (loading) {
+    return <div className="flex justify-center items-center">Loading...</div>;
+  }
+
   return (
     <div className="grid md:grid-cols-5 gap-8">
       {/* Product Details - Left Column */}
       <div className="md:col-span-3 space-y-6">
         <div className="flex items-start gap-4">
           <div>
-            <h1 className="text-3xl font-bold">{product.product_name}</h1>
+            <h1 className="text-3xl font-bold">{product?.product_name}</h1>
             <div className="flex items-center gap-2 mt-2">
-              <Badge variant="outline">{product.product_code}</Badge>
+              <Badge variant="outline">{product?.product_code}</Badge>
             </div>
           </div>
         </div>
@@ -100,7 +122,7 @@ export default function ProductDetails({ product }) {
               <div>
                 <h2 className="text-xl font-semibold mb-2">Description</h2>
                 <p className="text-muted-foreground">
-                  {product.short_description}
+                  {product?.short_description}
                 </p>
               </div>
 
@@ -108,13 +130,13 @@ export default function ProductDetails({ product }) {
                 <div className="flex items-center gap-2">
                   <Tag className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    Product Code: {product.product_code}
+                    Product Code: {product?.product_code}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Package className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    Stock: {product.available_stock} units
+                    Stock: {product?.available_stock} units
                   </span>
                 </div>
               </div>
@@ -131,12 +153,12 @@ export default function ProductDetails({ product }) {
               </div>
               <div>
                 <h3 className="font-medium">
-                  {product.seller.data.first_name}{" "}
-                  {product.seller.data.last_name}
+                  {product?.seller.data.first_name}{" "}
+                  {product?.seller.data.last_name}
                 </h3>
                 <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4" />
-                  <span>{product.seller.data.country}</span>
+                  <span>{product?.seller.data.country}</span>
                 </div>
               </div>
             </div>
@@ -151,11 +173,11 @@ export default function ProductDetails({ product }) {
             <div className="space-y-6">
               <div>
                 <h2 className="text-2xl font-bold text-primary">
-                  {product.item_price}
+                  {product?.item_price}
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {product.available_stock > 0
-                    ? `${product.available_stock} units available`
+                  {product?.available_stock > 0
+                    ? `${product?.available_stock} units available`
                     : "Currently out of stock"}
                 </p>
               </div>
@@ -183,7 +205,7 @@ export default function ProductDetails({ product }) {
                       id="quantity"
                       type="number"
                       min="1"
-                      max={product.available_stock}
+                      max={product?.available_stock}
                       value={quantity}
                       onChange={handleQuantityChange}
                       className="w-16 mx-2 text-center"
@@ -192,7 +214,7 @@ export default function ProductDetails({ product }) {
                       variant="outline"
                       size="icon"
                       onClick={incrementQuantity}
-                      disabled={quantity >= product.available_stock}
+                      disabled={quantity >= product?.available_stock}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -202,7 +224,7 @@ export default function ProductDetails({ product }) {
                 <div>
                   <p className="text-sm mb-1">Subtotal</p>
                   <p className="text-lg font-semibold">
-                    $ {product.item_price * quantity}
+                    $ {product?.item_price * quantity}
                   </p>
                 </div>
 
@@ -210,7 +232,7 @@ export default function ProductDetails({ product }) {
                   className="w-full"
                   size="lg"
                   onClick={addItemToCart}
-                  disabled={product.available_stock <= 0}
+                  disabled={product?.available_stock <= 0}
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
                   Add to Cart
