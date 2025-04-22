@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -24,94 +24,130 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// import { formatCurrency } from "@/lib/utils";
+import { postData } from "@/lib/apiService";
+
+import { useSelector } from "react-redux";
+import { toast } from "sonner";
 
 // Sample orders data
-const ordersData = [
-  {
-    id: "6146014b-e3d9-48de-87c3-871b6a8d9b1d",
-    order_reference: "ORDER-#1016",
-    buyer_id: "0862df85-e0ad-449b-85cd-229903ee4f02",
-    status: "COMPLETED",
-    order_items: [
-      {
-        id: "ec5a662a-9046-42f9-b240-c533c2db1efd",
-        order_reference: "ORDER-#1016",
-        product_id: "d47ef880-06cd-4fdc-aa63-1dad7b02b2ce",
-        product_name: "Wireless Mouse", // Adding product name for display
-        quantity: 10,
-        order_item_price: "25.99",
-      },
-      {
-        id: "4dbb38e3-d688-47f5-b1be-ce550b7dfe49",
-        order_reference: "ORDER-#1016",
-        product_id: "98cb5139-6c88-4001-9144-69fae28d7e9f",
-        product_name: "Mechanical Keyboard", // Adding product name for display
-        quantity: 20,
-        order_item_price: "74.50",
-      },
-    ],
-  },
-  {
-    id: "7a8b9c0d-1e2f-3g4h-5i6j-7k8l9m0n1o2p",
-    order_reference: "ORDER-#1017",
-    buyer_id: "0862df85-e0ad-449b-85cd-229903ee4f02",
-    status: "PENDING",
-    order_items: [
-      {
-        id: "3q4r5s6t-7u8v-9w0x-1y2z-3a4b5c6d7e8f",
-        order_reference: "ORDER-#1017",
-        product_id: "78a63aa4-7d9d-4509-a307-bb88aae6356c",
-        product_name: "Noise Cancelling Headphones",
-        quantity: 1,
-        order_item_price: "129.99",
-      },
-    ],
-  },
-  {
-    id: "9g8h7i6j-5k4l-3m2n-1o0p-9q8r7s6t5u4v",
-    order_reference: "ORDER-#1018",
-    buyer_id: "0862df85-e0ad-449b-85cd-229903ee4f02",
-    status: "PENDING",
-    order_items: [
-      {
-        id: "3w4x5y6z-7a8b-9c0d-1e2f-3g4h5i6j7k8l",
-        order_reference: "ORDER-#1018",
-        product_id: "f45d378b-1a2d-4703-bf2a-31fbac6b7a20",
-        product_name: "USB-C Hub",
-        quantity: 2,
-        order_item_price: "29.99",
-      },
-      {
-        id: "9m0n1o2p-3q4r-5s6t-7u8v-9w0x1y2z3a4b",
-        order_reference: "ORDER-#1018",
-        product_id: "8f43649e-24a5-489f-ad91-d2ba78e62b71",
-        product_name: "Bluetooth Speaker",
-        quantity: 1,
-        order_item_price: "49.99",
-      },
-    ],
-  },
-  {
-    id: "5c6d7e8f-9g0h-1i2j-3k4l-5m6n7o8p9q0r",
-    order_reference: "ORDER-#1019",
-    buyer_id: "0862df85-e0ad-449b-85cd-229903ee4f02",
-    status: "CANCELLED",
-    order_items: [
-      {
-        id: "1s2t3u4v-5w6x-7y8z-9a0b-1c2d3e4f5g6h",
-        order_reference: "ORDER-#1019",
-        product_id: "8f4b4aca-56d7-4bed-b1a4-a81172aa6a54",
-        product_name: "1080p Webcam",
-        quantity: 1,
-        order_item_price: "39.99",
-      },
-    ],
-  },
-];
+// const ordersData = [
+//   {
+//     id: "6146014b-e3d9-48de-87c3-871b6a8d9b1d",
+//     order_reference: "ORDER-#1016",
+//     buyer_id: "0862df85-e0ad-449b-85cd-229903ee4f02",
+//     status: "COMPLETED",
+//     order_items: [
+//       {
+//         id: "ec5a662a-9046-42f9-b240-c533c2db1efd",
+//         order_reference: "ORDER-#1016",
+//         product_id: "d47ef880-06cd-4fdc-aa63-1dad7b02b2ce",
+//         product_name: "Wireless Mouse", // Adding product name for display
+//         quantity: 10,
+//         order_item_price: "25.99",
+//       },
+//       {
+//         id: "4dbb38e3-d688-47f5-b1be-ce550b7dfe49",
+//         order_reference: "ORDER-#1016",
+//         product_id: "98cb5139-6c88-4001-9144-69fae28d7e9f",
+//         product_name: "Mechanical Keyboard", // Adding product name for display
+//         quantity: 20,
+//         order_item_price: "74.50",
+//       },
+//     ],
+//   },
+//   {
+//     id: "7a8b9c0d-1e2f-3g4h-5i6j-7k8l9m0n1o2p",
+//     order_reference: "ORDER-#1017",
+//     buyer_id: "0862df85-e0ad-449b-85cd-229903ee4f02",
+//     status: "PENDING",
+//     order_items: [
+//       {
+//         id: "3q4r5s6t-7u8v-9w0x-1y2z-3a4b5c6d7e8f",
+//         order_reference: "ORDER-#1017",
+//         product_id: "78a63aa4-7d9d-4509-a307-bb88aae6356c",
+//         product_name: "Noise Cancelling Headphones",
+//         quantity: 1,
+//         order_item_price: "129.99",
+//       },
+//     ],
+//   },
+//   {
+//     id: "9g8h7i6j-5k4l-3m2n-1o0p-9q8r7s6t5u4v",
+//     order_reference: "ORDER-#1018",
+//     buyer_id: "0862df85-e0ad-449b-85cd-229903ee4f02",
+//     status: "PENDING",
+//     order_items: [
+//       {
+//         id: "3w4x5y6z-7a8b-9c0d-1e2f-3g4h5i6j7k8l",
+//         order_reference: "ORDER-#1018",
+//         product_id: "f45d378b-1a2d-4703-bf2a-31fbac6b7a20",
+//         product_name: "USB-C Hub",
+//         quantity: 2,
+//         order_item_price: "29.99",
+//       },
+//       {
+//         id: "9m0n1o2p-3q4r-5s6t-7u8v-9w0x1y2z3a4b",
+//         order_reference: "ORDER-#1018",
+//         product_id: "8f43649e-24a5-489f-ad91-d2ba78e62b71",
+//         product_name: "Bluetooth Speaker",
+//         quantity: 1,
+//         order_item_price: "49.99",
+//       },
+//     ],
+//   },
+//   {
+//     id: "5c6d7e8f-9g0h-1i2j-3k4l-5m6n7o8p9q0r",
+//     order_reference: "ORDER-#1019",
+//     buyer_id: "0862df85-e0ad-449b-85cd-229903ee4f02",
+//     status: "CANCELLED",
+//     order_items: [
+//       {
+//         id: "1s2t3u4v-5w6x-7y8z-9a0b-1c2d3e4f5g6h",
+//         order_reference: "ORDER-#1019",
+//         product_id: "8f4b4aca-56d7-4bed-b1a4-a81172aa6a54",
+//         product_name: "1080p Webcam",
+//         quantity: 1,
+//         order_item_price: "39.99",
+//       },
+//     ],
+//   },
+// ];
 
 export default function OrdersPage() {
+  const [ordersData, setOrdersData] = useState([]);
   const [expandedOrders, setExpandedOrders] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const user = useSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      const payload = {
+        userId: user.id,
+      };
+
+      try {
+        const response = await postData(
+          `orders/get-all-orders-by-userId`,
+          payload
+        );
+        console.log("my orders", response);
+        if (!response || response?.length === 0) {
+          toast.error("No Orders found. Please Check again!");
+          setLoading(false);
+          return;
+        } else {
+          setOrdersData(response);
+          setLoading(false);
+        }
+      } catch (err) {
+        setLoading(false);
+        throw err;
+      }
+    };
+    fetchOrders();
+  }, []);
 
   // Toggle order expansion
   const toggleOrderExpansion = (orderId) => {
@@ -158,6 +194,10 @@ export default function OrdersPage() {
     }
   };
 
+  if (loading) {
+    return <div className="flex justify-center items-center">Loading...</div>;
+  }
+
   return (
     <div className="container mx-auto py-8">
       <div className="mb-6">
@@ -173,7 +213,7 @@ export default function OrdersPage() {
         </p>
       </div>
 
-      {ordersData.length === 0 ? (
+      {ordersData?.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent>
             <div className="flex justify-center mb-4">
@@ -187,7 +227,7 @@ export default function OrdersPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {ordersData.map((order) => {
+          {ordersData?.map((order) => {
             const isExpanded = expandedOrders[order.id];
             const statusBadge = getStatusBadge(order.status);
             const StatusIcon = statusBadge.icon;
