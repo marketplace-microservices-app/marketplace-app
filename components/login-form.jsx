@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { useDispatch } from "react-redux";
 import { login } from "@/redux/authSlice";
+import { postData } from "@/lib/apiService";
+import { toast } from "sonner";
 
 export default function LoginForm() {
   //   const { toast } = useToast();
@@ -31,40 +33,57 @@ export default function LoginForm() {
 
     console.log("Login Data:", loginData);
 
-    const response = {
-      status: 200,
-      message: "Login Successful",
-      accessToken:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNGRhNjY2MC1kY2I3LTQ0MDctOWU5MC1lZWI4MmQ1MThlNzMiLCJlbWFpbCI6ImphbmUuZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6ImJ1eWVyIiwiaWF0IjoxNzQ1MTU2ODA5fQ.tOm5-yM3WDeLE4qsR1_NVFsQk94pEjJyEdJTRwU7o7k",
-      user: {
-        id: "a4da6660-dcb7-4407-9e90-eeb82d518e73",
-        email: "jane.doe@example.com",
-        role: "buyer",
-      },
-    };
+    // const response = {
+    //   status: 200,
+    //   message: "Login Successful",
+    //   accessToken:
+    //     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNGRhNjY2MC1kY2I3LTQ0MDctOWU5MC1lZWI4MmQ1MThlNzMiLCJlbWFpbCI6ImphbmUuZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6ImJ1eWVyIiwiaWF0IjoxNzQ1MTU2ODA5fQ.tOm5-yM3WDeLE4qsR1_NVFsQk94pEjJyEdJTRwU7o7k",
+    //   user: {
+    //     id: "a4da6660-dcb7-4407-9e90-eeb82d518e73",
+    //     email: "jane.doe@example.com",
+    //     role: "buyer",
+    //   },
+    // };
 
     // Simulate a login rquest
     try {
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          if (email === "admin@admin.com" && password === "admin") {
-            resolve("Login successful");
+      // DO API call
+      const response = await postData("/auth/login", loginData);
+      console.log("login response", response);
+      if (response.status !== 200 || !response) {
+        setError(response.message);
+        setIsSubmitting(false);
 
-            const userData = {
-              token: response.accessToken,
-              ...response.user,
-            };
+        toast.error(error, {
+          description: "There was an logging to your account.",
+          variant: "error",
+        });
 
-            dispatch(login(userData));
-          } else {
-            reject(new Error("Invalid email or password"));
-          }
-        }, 2000);
-      });
+        return;
+      } else if (response.status === 200) {
+        const userData = {
+          token: response.accessToken,
+          ...response.user,
+        };
+
+        console.log("logged in data", userData);
+
+        dispatch(login(userData));
+
+        toast.success("Login Successful", {
+          description: "You have successfully logged in.",
+          variant: "default",
+        });
+      }
     } catch (error) {
       console.error("Login error:", error);
       setError(error.message);
       setIsSubmitting(false);
+
+      toast.error(error, {
+        description: "There was an logging to your account.",
+        variant: "error",
+      });
     }
   };
 

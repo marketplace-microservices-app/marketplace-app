@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// import { useToast } from "@/hooks/use-toast";
+import { postData } from "@/lib/apiService";
+import { toast } from "sonner";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -58,6 +59,34 @@ export default function RegisterForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    // If Buyer delete country key value pair from formState object
+    if (formState.role === "buyer") {
+      delete formState.country;
+    }
+
+    // Do API call
+    const response = await postData("auth/register", formState);
+    if (response.status !== 201 || !response) {
+      setErrors(response.error);
+      setIsSubmitting(false);
+
+      toast.error(`Something went wrong!`, {
+        description: "There was an error creating your account.",
+        variant: "error",
+      });
+
+      return;
+    }
+    // Handle success
+    toast.success(`Account created successfully!`, {
+      description: "You can now log in.",
+      variant: "success",
+    });
+
+    redirect("/login");
+
+    // console.log("Form submitted:", formState);
   };
 
   const countries = [
