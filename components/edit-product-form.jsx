@@ -15,28 +15,51 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Save } from "lucide-react";
+import { fetchData, postData } from "@/lib/apiService";
 
-export default function EditProductForm({ product }) {
+export default function EditProductForm({ productId }) {
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      const response = await fetchData(
+        `product/get-product-details-by-productId/${productId}`,
+        null
+      );
+      setProduct(response?.data || []);
+      setLoading(false);
+    };
+
+    fetchProduct();
+  }, []);
+
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    productName: product.product_name,
-    shortDesc: product.short_description,
-    itemPrice: product.item_price,
-    availableStock: product.available_stock,
+    productName: product?.product_name,
+    shortDesc: product?.short_description,
+    itemPrice: product?.item_price,
+    availableStock: product?.available_stock,
   });
   const [initialFormData, setInitialFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [modifiedFields, setModifiedFields] = useState({});
+  const [error, setError] = useState("");
 
-  // Set initial form data
   useEffect(() => {
-    setInitialFormData({
-      productName: product.product_name,
-      shortDesc: product.short_description,
-      itemPrice: product.item_price,
-      availableStock: product.available_stock,
-    });
+    if (product) {
+      const newFormData = {
+        productName: product.product_name,
+        shortDesc: product.short_description,
+        itemPrice: product.item_price,
+        availableStock: product.available_stock,
+      };
+
+      setInitialFormData(newFormData);
+      setFormData(newFormData);
+    }
   }, [product]);
 
   const handleChange = (e) => {
@@ -62,12 +85,48 @@ export default function EditProductForm({ product }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (Object.keys(modifiedFields).length === 0) {
+    if (Object.keys(modifiedFields)?.length === 0) {
       toast({
         title: "No changes detected",
         description: "You haven't made any changes to the product.",
       });
       return;
+    }
+
+    const updatedProduct = {
+      id: productId,
+      ...formData,
+    };
+
+    try {
+      const response = await postData(`product/update`, updatedProduct);
+      console.log("response", response);
+
+      if (response.status !== 200 || !response) {
+        setError(response.message);
+        setIsSubmitting(false);
+
+        toast.error(error, {
+          description: "There was an issue with updating the product",
+          variant: "error",
+        });
+
+        return;
+      } else if (response.status === 200) {
+        toast.success(response.message, {
+          title: "Product Updated!",
+          description: "Your product has been successfully updated.",
+        });
+      }
+      setIsSubmitting(false);
+    } catch (err) {
+      setError(err.message);
+      setIsSubmitting(false);
+
+      toast.error(error, {
+        description: "There was an issue with creating the product",
+        variant: "error",
+      });
     }
 
     setIsSubmitting(true);
@@ -82,7 +141,7 @@ export default function EditProductForm({ product }) {
     <div className="max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Edit Product: {product.product_name}</CardTitle>
+          <CardTitle>Edit Product: {product?.product_name}</CardTitle>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -128,7 +187,7 @@ export default function EditProductForm({ product }) {
                 <p className="text-sm text-red-500">{errors.shortDesc}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                {formData.shortDesc.length}/200 characters
+                {formData.shortDesc?.length}/100 characters
               </p>
             </div>
 
@@ -189,7 +248,7 @@ export default function EditProductForm({ product }) {
             <div className="pt-2">
               <p className="text-sm text-muted-foreground">
                 Product Code:{" "}
-                <span className="font-medium">{product.product_code}</span>{" "}
+                <span className="font-medium">{product?.product_code}</span>{" "}
                 (cannot be changed)
               </p>
             </div>
@@ -205,7 +264,7 @@ export default function EditProductForm({ product }) {
             <Button
               type="submit"
               disabled={
-                isSubmitting || Object.keys(modifiedFields).length === 0
+                isSubmitting || Object.keys(modifiedFields)?.length === 0
               }
               className="flex items-center"
             >
