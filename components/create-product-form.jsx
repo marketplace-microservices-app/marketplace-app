@@ -13,8 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { fetchData, postData } from "@/lib/apiService";
 
-export default function CreateProductForm({ onProductCreated }) {
+export default function CreateProductForm({ onProductCreated, user }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     productCode: "",
@@ -24,6 +25,7 @@ export default function CreateProductForm({ onProductCreated }) {
     availableStock: "",
   });
   const [errors, setErrors] = useState({});
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,7 +41,62 @@ export default function CreateProductForm({ onProductCreated }) {
 
     console.log("Form Data:", formData);
 
+    // Get Seller Data using User Id
+    const sellerDataResponse = await fetchData(
+      `users/get-seller-details-from-userId/${user.id}`
+    );
+
+    if (sellerDataResponse) {
+      toast.error(sellerDataResponse.message);
+    }
+
+    const createProductPayload = {
+      ...formData,
+      sellerId: sellerDataResponse.data.id,
+    };
+
+    console.log("createProductPayload", createProductPayload);
+
     setIsSubmitting(true);
+
+    try {
+      const response = await postData(`product/create`, createProductPayload);
+      console.log("createProductResponse", response);
+
+      if (response.status !== 201 || !response) {
+        setError(response.message);
+        setIsSubmitting(false);
+
+        toast.error(error, {
+          description: "There was an issue with creating the product",
+          variant: "error",
+        });
+
+        return;
+      } else if (response.status === 201) {
+        toast.success(response.message, {
+          title: "Product Created!",
+          description: "Your product has been successfully created.",
+        });
+
+        // Call the passed parent function to update parent state about the new product
+        console.log("onProductCreated", onProductCreated);
+        if (onProductCreated) {
+          console.log("created product", response.data);
+          onProductCreated(response.data);
+        }
+      }
+
+      setIsSubmitting(false);
+    } catch (err) {
+      setError(err.message);
+      setIsSubmitting(false);
+
+      toast.error(error, {
+        description: "There was an issue with creating the product",
+        variant: "error",
+      });
+    }
   };
 
   return (
@@ -138,7 +195,7 @@ export default function CreateProductForm({ onProductCreated }) {
         </CardContent>
         <br />
         <CardFooter>
-          <Button type="submit" className="w-full" disabled={isSubmitting} onCl>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Creating..." : "Create Product"}
           </Button>
         </CardFooter>
