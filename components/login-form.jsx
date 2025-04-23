@@ -63,6 +63,7 @@ export default function LoginForm() {
       } else if (response.status === 200) {
         const userData = {
           token: response.accessToken,
+          refreshToken: response.refreshToken,
           ...response.user,
         };
 
