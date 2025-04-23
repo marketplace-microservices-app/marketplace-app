@@ -149,6 +149,48 @@ export default function OrdersPage() {
     fetchOrders();
   }, []);
 
+  const handleCancelOrder = async (orderId) => {
+    setLoading(true);
+    console.log(`Canceling order with ID: ${orderId}`);
+
+    const orderCancelPayload = {
+      orderId: orderId,
+    };
+
+    try {
+      const response = await postData(`orders/cancel`, orderCancelPayload);
+      console.log("order cancel", response);
+      if (response.status !== 200 || !response) {
+        setError(response.message);
+        setIsSubmitting(false);
+
+        toast.error(error, {
+          description: "There was an issue with cancelling the order",
+          variant: "error",
+        });
+
+        setLoading(false);
+
+        return;
+      } else if (response.status === 200) {
+        toast.warn(response.message, {
+          title: "Order cancelled!",
+          description: "Your order has been cancelled",
+        });
+
+        setLoading(false);
+      }
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+
+      toast.error(error, {
+        description: "There was an issue with cancelling the order",
+        variant: "error",
+      });
+    }
+  };
+
   // Toggle order expansion
   const toggleOrderExpansion = (orderId) => {
     setExpandedOrders((prev) => ({
@@ -273,6 +315,17 @@ export default function OrdersPage() {
                           </>
                         )}
                       </Button>
+
+                      {order?.status !== "CANCELLED" && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="flex items-center gap-1"
+                          onClick={() => handleCancelOrder(order.id)}
+                        >
+                          Cancel Order
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardHeader>

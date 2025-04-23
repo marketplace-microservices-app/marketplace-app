@@ -14,12 +14,15 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchData, postData } from "@/lib/apiService";
+
+import { clearCart } from "@/redux/cartSlice";
 
 export default function CartPage() {
   const cartProducts = useSelector((state) => state.cart.products);
   const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
 
   const [cartItems, setCartItems] = useState(cartProducts);
 
@@ -86,10 +89,16 @@ export default function CartPage() {
       setLoading(false);
 
       toast.error(error, {
-        description: "There was an logging to your account.",
+        description: "There was an issue with placing the order",
         variant: "error",
       });
     }
+  };
+
+  const handleClearCart = () => {
+    console.log("Clearing Cart...");
+    dispatch(clearCart());
+    setCartItems([]);
   };
 
   return (
@@ -101,7 +110,17 @@ export default function CartPage() {
             Continue Shopping
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Your Shopping Cart</h1>
+        <div className="flex justify-between items-center p-4">
+          <h1 className="text-3xl font-bold">Your Shopping Cart</h1>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="flex items-center"
+            onClick={handleClearCart}
+          >
+            Clear Cart
+          </Button>
+        </div>
       </div>
 
       {cartItems.length === 0 ? (
